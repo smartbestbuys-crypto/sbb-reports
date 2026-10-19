@@ -27,7 +27,7 @@ a{color:var(--blu)}
 .gate .box:hover,.gate .box:focus-within{box-shadow:0 1px 6px rgba(32,33,36,.28);border-color:#c4c7cc}
 .gate .box svg{flex:0 0 18px;fill:#9aa0a6}
 .gate input[type=password]{flex:1;min-width:0;height:44px;border:0;outline:0;font-size:16px;background:transparent;color:#202124}
-.gate .btns{display:flex;justify-content:center;gap:12px;margin:26px 0 14px}
+.gate .btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 12px;margin:26px 0 14px}
 .gate button{min-width:140px;height:38px;padding:0 18px;border:1px solid #f8f9fa;border-radius:6px;background:#f8f9fa;color:#3c4043;font-size:14px;cursor:pointer}
 .gate button:hover{border-color:#dadce0;box-shadow:0 1px 1px rgba(0,0,0,.1);color:#202124}
 .gate button.main{background:#9a1b1f;border-color:#9a1b1f;color:#fff;font-weight:500}
@@ -162,7 +162,7 @@ footer{color:var(--sub);font-size:12px;text-align:center;padding:24px 16px 40px}
 <div class="cal"><div class="cal-h"><button id="prev" aria-label="เดือนก่อน">&#8249;</button><b id="mon"></b>
 <button id="next" aria-label="เดือนถัดไป">&#8250;</button></div><div class="cal-g" id="grid"></div>
 <div class="legend"><span><i style="background:#fbeaea;border:1px solid #9a1b1f"></i>มีรายงาน</span><span><i style="background:#9a1b1f"></i>ล่าสุด</span></div></div>
-<div class="btns"><button class="main" id="latest">เปิดรายงานล่าสุด</button><button onclick="location.href='dashboard.html'">แดชบอร์ดกราฟ</button></div>
+<div class="btns"><button class="main" id="latest">เปิดรายงานล่าสุด</button><button onclick="location.href='monthly.html'">รายงานรวมรายเดือน</button><button onclick="location.href='dashboard.html'">แดชบอร์ดกราฟ</button></div>
 </div><footer class="gfoot"><span>บริษัท สมาร์ท เบสท์บายส์ จำกัด · ร้านไทยจราจร</span><span>ข้อมูลภายในบริษัท ห้ามเผยแพร่</span></footer></div>
 <script>
 const DAYS=["2026-10-10", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17", "2026-10-19"], HAS=new Set(DAYS), LAST=DAYS[DAYS.length-1];
