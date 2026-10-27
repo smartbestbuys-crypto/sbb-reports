@@ -172,6 +172,10 @@ main.wide{max-width:none;padding:16px}
 .sheet th.sun{color:var(--red)}
 .sheet td.na{color:var(--line);text-align:center}
 .legend{color:var(--sub);font-size:12px;margin:10px 2px 0;line-height:1.7}
+.ph{font-size:18px;margin:28px 0 4px}.ph3{font-size:15px;margin:16px 0 8px}
+.ps{max-height:none}.ps .c1{min-width:170px}
+.up{color:var(--grn);font-weight:600}.down{color:var(--red);font-weight:600}
+.more{margin:8px 0 0;font-size:14px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 </style>
 </head><body>
 <div id="gate" class="gate"><div class="gate-card">
@@ -194,8 +198,15 @@ main.wide{max-width:none;padding:16px}
   </div>
   <div class="sheet"><table id="t"></table></div>
   <p class="legend">ตัวเลขทั้งวัน 00:00–23:59 นับเป็นจำนวนลูกค้า (ไม่ใช่จำนวนข้อความ) · (%) ของแถวลูกค้าเก่า/ใหม่ = สัดส่วนจากยอดของหัวข้อนั้น ·
-    ลูกค้าเก่า = เคยแชทกับร้านก่อนวันนั้น, ลูกค้าใหม่ = ทักครั้งแรกในวันนั้น · ข้อ 6 (%) แถวหลัก = ตอบทันใน 1 ชม. ÷ ลูกค้าที่ทักในเวลาทำการ 08:30–17:30 ·
-    "–" = วันนั้นยังไม่มีตัวเลขแยก (รายงานรอบเย็นนับถึง 17:30 และไม่ได้แยกเก่า/ใหม่)</p>
+    ลูกค้าเก่า = เคยแชทกับร้านก่อนวันนั้น, ลูกค้าใหม่ = ทักครั้งแรกในวันนั้น ·
+    ค้างตอบ &lt; 1 วัน = ทักมาระหว่าง 17:30 เมื่อวาน–17:30 วันนั้น แล้วไม่มีพนักงานตอบเลย · ค้างตอบ &gt; 1 วัน = ทักก่อน 17:30 เมื่อวาน และถึง 17:30 วันนั้นยังไม่มีใครตอบ ·
+    ข้อ 5 (%) แถวหลัก = ÷ จำนวนขอใบเสนอราคา · ข้อ 8 (%) แถวหลัก = ตอบทันใน 1 ชม. ÷ ลูกค้าที่ทักในเวลาทำการ 08:30–17:30 ·
+    "–" = วันนั้นยังไม่มีตัวเลขนี้ (หัวข้อใหม่จะมีตั้งแต่วันที่เริ่มเก็บ หรือหลังเติมย้อนหลัง)</p>
+  <h2 class="ph">ความต้องการสินค้าจากลูกค้า <span class="hint">จำนวนครั้งที่ถูกถาม · ให้ฝ่ายการตลาดดูเทรนด์ · ภาพรวมทั้งทีม</span></h2>
+  <h3 class="ph3">สินค้าที่เรามีขาย</h3><div class="sheet ps"><table id="p1"></table></div>
+  <h3 class="ph3">สินค้าที่เราไม่มีขาย <span class="hint">โอกาสสินค้าใหม่</span></h3><div class="sheet ps"><table id="p0"></table></div>
+  <p class="legend">ครั้ง = จำนวนลูกค้า (ไม่ซ้ำ) ที่ถามถึงสินค้านั้นในวันนั้น · ปริมาณ = จำนวนที่ลูกค้าบอกว่าต้องการ (ไม่บอกจำนวน = ไม่นับ) ·
+    แนวโน้ม = ครั้งที่ถูกถาม 7 วันล่าสุด เทียบ 7 วันก่อนหน้า · เรียงจากถูกถามมากสุดในเดือน</p>
   <footer>ข้อมูลอัปเดตอัตโนมัติทุกคืน 00:30 น. (ตัวเลขเต็มวันของเมื่อวาน)</footer>
 </main></div>
 <script>
@@ -203,8 +214,11 @@ const u=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
 const TEAM='__team__';
 const MON=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const DOW=['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัส','วันศุกร์','วันเสาร์'];
-const ROWS=[['chats','จำนวนการทักทั้งหมด'],['pending','จำนวนค้างตอบ'],['qt_req','จำนวนขอใบเสนอราคา'],['qt_done','จำนวนส่งใบเสนอราคา'],
+const ROWS=[['chats','จำนวนการทักทั้งหมด'],['pending_1d','จำนวนค้างตอบ < 1 วัน'],['pending_over1d','จำนวนค้างตอบ > 1 วัน'],
+  ['qt_req','จำนวนขอใบเสนอราคา'],['qt_noreply1h','ขอใบเสนอราคา แต่ไม่ได้ตอบกลับเกิน 1 ชม.'],['qt_done','จำนวนส่งใบเสนอราคา'],
   ['closed','จำนวนที่ปิดการขาย'],['reply1h','จำนวนการตอบกลับภายใน 1 ชม.'],['site','จำนวนการขอดูหน้างาน'],['complaint','จำนวนการโดน Complaint']];
+// rows whose main-row (%) is a rate against another count instead of 100%
+const BASE={reply1h:'reply1h_base',qt_noreply1h:'qt_req'};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 let H=null,who=TEAM,Y,M;
@@ -256,16 +270,17 @@ function metricsOf(e){if(!e)return null;if(who===TEAM)return e.team||null;return
 // value for one cell: {n, p} where p is a percentage or null
 function cell(m,key,part){
   if(!m)return null;
-  if(!part){const n=m[key];if(n==null)return null;
-    const p=key==='reply1h'?(m.reply1h_base?Math.round(n*100/m.reply1h_base):null):(n>0?100:null);return {n,p};}
+  if(!part){const n=m[key];if(n==null)return null;const b=BASE[key];
+    const p=b?(m[b]?Math.round(n*100/m[b]):null):(n>0?100:null);return {n,p};}
   const g=m[part];if(!g||g[key]==null)return null;const tot=m[key];
   return {n:g[key],p:tot?Math.round(g[key]*100/tot):null};
 }
 function sum(ms,key,part){
   let n=0,base=0,any=false;
-  for(const m of ms){const src=part?m&&m[part]:m;if(!src||src[key]==null)continue;any=true;n+=src[key];if(key==='reply1h'&&!part)base+=m.reply1h_base||0;}
+  const b=BASE[key];
+  for(const m of ms){const src=part?m&&m[part]:m;if(!src||src[key]==null)continue;any=true;n+=src[key];if(b&&!part)base+=m[b]||0;}
   if(!any)return null;
-  if(!part)return {n,p:key==='reply1h'?(base?Math.round(n*100/base):null):(n>0?100:null)};
+  if(!part)return {n,p:b?(base?Math.round(n*100/base):null):(n>0?100:null)};
   // share is taken against the total of the same days that carry the old/new split
   const t=ms.filter(m=>m&&m[part]&&m[part][key]!=null).reduce((a,m)=>a+(m[key]||0),0);
   return {n,p:t?Math.round(n*100/t):null};
@@ -297,6 +312,58 @@ function render(){
     });
   });
   document.getElementById('t').innerHTML=h+'</tbody>';
+  renderProducts(D);
+}
+// ---- product demand (team-level, from day.products)
+const SHOW={1:30,0:30};
+function prodStats(D){
+  const map={};
+  const add=(p,dk)=>{const k=p.name+'|'+(p.sold?1:0);const o=map[k]||(map[k]={name:p.name,sold:!!p.sold,unit:p.unit||'ชิ้น',days:{}});
+    o.unit=p.unit||o.unit;o.days[dk]=p;};
+  for(const x of D)for(const p of (x.e?.products||[]))add(p,x.k);
+  return Object.values(map);
+}
+const pa=(p,part)=>{if(!p)return null;if(part)return p[part]||{asks:0,qty:0};
+  return {asks:(p.new?.asks||0)+(p.old?.asks||0),qty:(p.new?.qty||0)+(p.old?.qty||0)};};
+function trendOf(name,sold){
+  // asks over the last 7 days with data vs the 7 before, across all history
+  const days=H.days.filter(d=>d.products).map(d=>d.date).sort(),last=days.at(-1);if(!last)return null;
+  const t=new Date(last+'T00:00:00');const iso=x=>x.toISOString().slice(0,10);
+  const lo1=iso(new Date(t-6*864e5)),lo0=iso(new Date(t-13*864e5));
+  let a=0,b=0;for(const d of H.days){const p=(d.products||[]).find(p=>p.name===name&&!!p.sold===sold);if(!p)continue;
+    const n=pa(p).asks;if(d.date>=lo1&&d.date<=last)a+=n;else if(d.date>=lo0&&d.date<lo1)b+=n;}
+  if(!a&&!b)return null;if(!b)return {txt:'ใหม่',cls:'up'};
+  const pct=Math.round((a-b)*100/b);return {txt:(pct>0?'▲ ':pct<0?'▼ ':'')+Math.abs(pct)+'%',cls:pct>0?'up':pct<0?'down':''};
+}
+function renderProducts(D){
+  const P=prodStats(D),hasAny=D.some(x=>x.e?.products);
+  for(const sold of [1,0]){
+    const list=P.filter(p=>p.sold===!!sold).map(p=>{let n=0,q=0;for(const k in p.days){const t=pa(p.days[k]);n+=t.asks;q+=t.qty;}return {...p,n,q};})
+      .sort((a,b)=>b.n-a.n||b.q-a.q);
+    const el=document.getElementById('p'+sold);
+    if(!list.length){el.innerHTML=`<tbody><tr><td class="c1" style="padding:14px">${hasAny?'ไม่มีรายการในเดือนนี้':'ยังไม่มีข้อมูลสินค้าในเดือนนี้ (เริ่มเก็บตั้งแต่รอบ 00:30 หลังอัปเดตนี้ และเติมย้อนหลังได้)'}</td></tr></tbody>`;const b=el.parentElement.nextElementSibling;if(b&&b.classList.contains('more'))b.hidden=true;continue;}
+    const shown=list.slice(0,SHOW[sold]);
+    let h='<thead><tr><th class="c0" rowspan="3">ลำดับ</th><th class="c1" rowspan="3">ชื่อสินค้า</th><th rowspan="3">กลุ่มลูกค้า</th><th class="tot" colspan="3">รวมทั้งเดือน</th>'+
+      D.map(x=>`<th colspan="2"${x.dow===0?' class="sun"':''}>${x.d}/${M}/${Y}</th>`).join('')+'</tr><tr><th class="tot" colspan="3">'+esc(MON[M-1])+'</th>'+
+      D.map(x=>`<th colspan="2"${x.dow===0?' class="sun"':''}>${DOW[x.dow]}</th>`).join('')+'</tr><tr><th class="tot">ครั้ง</th><th class="tot">ปริมาณ</th><th class="tot">แนวโน้ม</th>'+
+      D.map(()=>'<th>ครั้ง</th><th>ปริมาณ</th>').join('')+'</tr></thead><tbody>';
+    shown.forEach((p,i)=>{
+      const tr=trendOf(p.name,p.sold);
+      [['new','ลูกค้าใหม่','sub'],['old','ลูกค้าเก่า','sub'],[null,'รวม','main grp-end']].forEach(([part,lab,cls],j)=>{
+        let n=0,q=0;for(const k in p.days){const t=pa(p.days[k],part);n+=t.asks;q+=t.qty;}
+        h+=`<tr class="${cls}">${j===0?`<td class="c0" rowspan="3">${i+1}</td><td class="c1" rowspan="3"><b>${esc(p.name)}</b><div class="sub">หน่วย: ${esc(p.unit)}</div></td>`:''}`+
+          `<td style="text-align:left">${lab}</td><td class="tot">${n.toLocaleString('th-TH')}</td><td class="tot">${q?q.toLocaleString('th-TH'):''}</td>`+
+          `<td class="tot ${j===2&&tr?tr.cls:''}">${j===2&&tr?tr.txt:''}</td>`+
+          D.map(x=>{const d=p.days[x.k];if(!x.e?.products)return '<td class="na">–</td><td class="na">–</td>';const t=pa(d,part)||{asks:0,qty:0};
+            return `<td>${t.asks||''}</td><td>${t.qty?t.qty.toLocaleString('th-TH'):''}</td>`;}).join('')+'</tr>';
+      });
+    });
+    el.innerHTML=h+'</tbody>';
+    let btn=el.parentElement.nextElementSibling;
+    if(!(btn&&btn.classList.contains('more'))){btn=document.createElement('button');btn.className='more';el.parentElement.after(btn);}
+    if(list.length>shown.length){btn.hidden=false;btn.textContent=`แสดงทั้งหมด (${list.length} รายการ)`;btn.onclick=()=>{SHOW[sold]=1e9;renderProducts(D);};}
+    else btn.hidden=true;
+  }
 }
 function csv(){
   const D=monthDays(),M_=D.map(x=>metricsOf(x.e));
@@ -305,6 +372,13 @@ function csv(){
     ['','','จำนวน','(%)',...D.flatMap(x=>[DOW[x.dow],''])],['','','','',...D.flatMap(()=>['จำนวน','(%)'])]];
   ROWS.forEach(([k,label],i)=>[[null,label],['old','- ลูกค้าเก่า'],['new','- ลูกค้าใหม่']].forEach(([part,lab],j)=>
     rows.push([j?'':i+1,lab,...v(sum(M_,k,part)),...M_.flatMap(m=>v(cell(m,k,part)))])));
+  for(const sold of [1,0]){
+    const list=prodStats(D).filter(p=>p.sold===!!sold).map(p=>{let n=0;for(const k in p.days)n+=pa(p.days[k]).asks;return {...p,n};}).sort((a,b)=>b.n-a.n);
+    rows.push([],[sold?'สินค้าที่เรามีขาย':'สินค้าที่เราไม่มีขาย'],['ลำดับ','ชื่อสินค้า','กลุ่มลูกค้า','รวม ครั้ง','รวม ปริมาณ',...D.flatMap(x=>[`${x.d}/${M}/${Y} ครั้ง`,'ปริมาณ'])]);
+    list.forEach((p,i)=>[['new','ลูกค้าใหม่'],['old','ลูกค้าเก่า'],[null,'รวม']].forEach(([part,lab],j)=>{
+      let n=0,q=0;for(const k in p.days){const t=pa(p.days[k],part);n+=t.asks;q+=t.qty;}
+      rows.push([j?'':i+1,j?'':`${p.name} (${p.unit})`,lab,n,q||'',...D.flatMap(x=>{const t=pa(p.days[x.k],part);return t?[t.asks||'',t.qty||'']:['',''];})]);}));
+  }
   const text='﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));
   a.download=`รายงานรวม_${Y}-${pad(M)}${who===TEAM?'':'_'+who}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
